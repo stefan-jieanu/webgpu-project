@@ -1,15 +1,8 @@
 // Include the C++ wrapper instead of the raw header(s)
 #define WEBGPU_CPP_IMPLEMENTATION
+#include <webgpu/webgpu.hpp>
 
 #include "Application.hpp"
-
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif // __EMSCRIPTEN__
-
-#include <iostream>
-#include <cassert>
-#include <vector>
 
 int main()
 {
@@ -29,8 +22,6 @@ int main()
         app.mainLoop();
     }
 #endif // __EMSCRIPTEN__
-
-    app.terminate();
 
     return 0;
 }

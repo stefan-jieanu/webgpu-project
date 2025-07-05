@@ -16,6 +16,7 @@ namespace gfx
 
         inline GLFWwindow *get() { return window; }
         inline bool shouldClose() { return glfwWindowShouldClose(window); }
+        inline void pollEvents() { glfwPollEvents(); }
         void terminate();
 
     private:
