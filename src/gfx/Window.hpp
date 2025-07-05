@@ -14,6 +14,9 @@ namespace gfx
         Window(int width, int height, std::string title);
         ~Window();
 
+        inline int getWidth() { return width; }
+        inline int getHeigth() { return height; }
+
         inline GLFWwindow *get() { return window; }
         inline bool shouldClose() { return glfwWindowShouldClose(window); }
         inline void pollEvents() { glfwPollEvents(); }

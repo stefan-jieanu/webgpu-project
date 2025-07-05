@@ -24,12 +24,16 @@ namespace gfx
         void terminate();
 
     private:
-        wgpu::TextureView GetNextSurfaceTextureView();
+        wgpu::TextureView getNextSurfaceTextureView();
+
+        void initializePipeline();
 
         // We put here all the variables that are shared between init and main loop
         wgpu::Device device;
         wgpu::Queue queue;
         wgpu::Surface surface;
         std::unique_ptr<wgpu::ErrorCallback> uncapturedErrorCallbackHandle;
+        wgpu::TextureFormat surfaceFormat = wgpu::TextureFormat::Undefined;
+        wgpu::RenderPipeline pipeline;
     };
 } // namespace gfx
