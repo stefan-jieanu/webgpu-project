@@ -99,7 +99,7 @@ namespace gfx
 
         // Configuration of the textures created for the underlying swap chain
         config.width = window.getWidth();
-        config.height = window.getHeigth();
+        config.height = window.getHeight();
         config.usage = wgpu::TextureUsage::RenderAttachment;
         // WARNING: Deprecated
         surfaceFormat = surface.getPreferredFormat(adapter);

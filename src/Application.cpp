@@ -19,6 +19,12 @@ void Application::mainLoop()
 {
     window.pollEvents();
 
+    if (window.isKeyPressed(GLFW_KEY_ESCAPE))
+        window.close();
+
+    if (window.isKeyPressed(GLFW_KEY_A))
+        std::cout << "pressed a\n";
+
     bear.draw();
 }
 
