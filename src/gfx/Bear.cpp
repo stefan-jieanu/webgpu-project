@@ -28,19 +28,45 @@ namespace gfx
 
     bool Bear::initialize(Window &window)
     {
+        // Create WebGPU instance
         wgpu::Instance instance = wgpuCreateInstance(nullptr);
 
+        // Create surface to draw to (the screen)
         surface = glfwGetWGPUSurface(instance, window.get());
 
+        // Request the adapter
         std::cout << "Requesting adapter..." << std::endl;
-        surface = glfwGetWGPUSurface(instance, window.get());
         wgpu::RequestAdapterOptions adapterOpts = {};
         adapterOpts.compatibleSurface = surface;
         wgpu::Adapter adapter = instance.requestAdapter(adapterOpts);
         std::cout << "Got adapter: " << adapter << std::endl;
 
+        // Release the WebGPU instance.
+        // The isntance references are counted internally and will only be released for real
+        // when it is no longer needed by the adapter, device etc...
         instance.release();
 
+        // Initialize the device
+        initializeDevice(adapter);
+
+        // Configure the surface with the proper properties and window size
+        configureSurface(window, adapter);
+
+        // Get the device queue
+        // WebGPU only supports one queue (at least for now)
+        queue = device.getQueue();
+
+        // Release the adapter only after it has been fully utilized
+        adapter.release();
+
+        // Create a pipeline used for drawing
+        initializePipeline();
+
+        return true;
+    }
+
+    void Bear::initializeDevice(wgpu::Adapter &adapter)
+    {
         std::cout << "Requesting device..." << std::endl;
         wgpu::DeviceDescriptor deviceDesc = {};
         deviceDesc.label = "My Device";
@@ -64,9 +90,10 @@ namespace gfx
 		std::cout << "Uncaptured device error: type " << type;
 		if (message) std::cout << " (" << message << ")";
 		std::cout << std::endl; });
+    }
 
-        queue = device.getQueue();
-
+    void Bear::configureSurface(Window &window, wgpu::Adapter &adapter)
+    {
         // Configure the surface
         wgpu::SurfaceConfiguration config = {};
 
@@ -86,13 +113,6 @@ namespace gfx
         config.alphaMode = wgpu::CompositeAlphaMode::Auto;
 
         surface.configure(config);
-
-        // Release the adapter only after it has been fully utilized
-        adapter.release();
-
-        initializePipeline();
-
-        return true;
     }
 
     void Bear::draw()
@@ -176,26 +196,7 @@ namespace gfx
         surface.release();
         device.release();
     }
-    // We embbed the source of the shader module here
-    const char *shaderSource = R"(
-@vertex
-fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4f {
-	var p = vec2f(0.0, 0.0);
-	if (in_vertex_index == 0u) {
-		p = vec2f(-0.5, -0.5);
-	} else if (in_vertex_index == 1u) {
-		p = vec2f(0.5, -0.5);
-	} else {
-		p = vec2f(0.0, 0.5);
-	}
-	return vec4f(p, 0.0, 1.0);
-}
 
-@fragment
-fn fs_main() -> @location(0) vec4f {
-	return vec4f(0.0, 0.4, 1.0, 1.0);
-}
-)";
     void Bear::initializePipeline()
     {
 

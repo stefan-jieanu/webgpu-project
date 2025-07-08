@@ -26,6 +26,8 @@ namespace gfx
     private:
         wgpu::TextureView getNextSurfaceTextureView();
 
+        void initializeDevice(wgpu::Adapter &adapter);
+        void configureSurface(Window &window, wgpu::Adapter &adapter);
         void initializePipeline();
 
         // We put here all the variables that are shared between init and main loop
