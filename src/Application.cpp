@@ -10,6 +10,62 @@ Application::Application()
         std::cout << "Aoleu, am belito!\n";
 
     window.setInputManager(&inputManager);
+
+    // Register input functions in Lua
+    auto &luaState = lua.getState();
+
+    // Keyboard
+    luaState.set_function("isKeyDown", [this](int key)
+                          { return inputManager.isKeyDown(key); });
+
+    luaState.set_function("wasKeyPressed", [this](int key)
+                          { return inputManager.wasKeyPressed(key); });
+
+    luaState.set_function("wasKeyReleased", [this](int key)
+                          { return inputManager.wasKeyReleased(key); });
+
+    // Mouse buttons
+    luaState.set_function("isMouseButtonDown", [this](int button)
+                          { return inputManager.isMouseButtonDown(button); });
+
+    luaState.set_function("wasMouseButtonPressed", [this](int button)
+                          { return inputManager.wasMouseButtonPressed(button); });
+
+    luaState.set_function("wasMouseButtonReleased", [this](int button)
+                          { return inputManager.wasMouseButtonReleased(button); });
+
+    // Mouse position
+    luaState.set_function("getMousePosition", [this]()
+                          {
+        double x, y;
+        inputManager.getMousePosition(x, y);
+        return std::make_tuple(x, y); });
+
+    // Mouse delta
+    luaState.set_function("getMouseDelta", [this]()
+                          {
+        double dx, dy;
+        inputManager.getMouseDelta(dx, dy);
+        return std::make_tuple(dx, dy); });
+
+    // Scroll
+    luaState.set_function("getScrollOffset", [this]()
+                          {
+        double sx, sy;
+        inputManager.getScrollOffset(sx, sy);
+        return std::make_tuple(sx, sy); });
+
+    // Keyboard keys (GLFW key codes)
+    sol::table keys = luaState.create_named_table("Keys");
+    keys["SPACE"] = GLFW_KEY_SPACE;
+    keys["W"] = GLFW_KEY_W;
+    keys["ESCAPE"] = GLFW_KEY_ESCAPE;
+
+    sol::table mouse = luaState.create_named_table("Mouse");
+    mouse["LEFT"] = GLFW_MOUSE_BUTTON_LEFT;
+    mouse["RIGHT"] = GLFW_MOUSE_BUTTON_RIGHT;
+
+    lua.loadScript("./scripts/main.lua");
 }
 
 bool Application::isRunning()
@@ -21,50 +77,7 @@ void Application::mainLoop()
 {
     window.pollEvents();
 
-    if (inputManager.wasKeyPressed(GLFW_KEY_A))
-        std::cout << "pressed a\n";
-
-    if (inputManager.wasKeyReleased(GLFW_KEY_A))
-        std::cout << "released a\n";
-
-    if (inputManager.isKeyDown(GLFW_KEY_E))
-        std::cout << " is down: e\n";
-
-    // Use in logic:
-    if (inputManager.wasMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
-    {
-        std::cout << "Mouse left clicked!\n";
-    }
-
-    // Use in logic:
-    if (inputManager.wasMouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT))
-    {
-        std::cout << "Mouse left released!\n";
-    }
-
-    double scrollX, scrollY;
-    inputManager.getScrollOffset(scrollX, scrollY);
-
-    if (scrollY != 0.0)
-    {
-        std::cout << "Scrolled vertically: " << scrollY << "\n";
-    }
-
-    if (scrollX != 0.0)
-    {
-        std::cout << "Scrolled horizontally: " << scrollX << "\n";
-    }
-
-    // double mx, my;
-    // inputManager.getMousePosition(mx, my);
-    // std::cout << "Mouse position: " << mx << ", " << my << "\n";
-
-    // double dx, dy;
-    // inputManager.getMouseDelta(dx, dy);
-    // if (dx != 0 || dy != 0)
-    // {
-    //     std::cout << "Mouse moved: (" << dx << ", " << dy << ")\n";
-    // }
+    lua.update();
 
     if (inputManager.isKeyDown(GLFW_KEY_ESCAPE))
         window.close();
