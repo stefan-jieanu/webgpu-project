@@ -24,6 +24,7 @@ namespace gfx
         glfwSetKeyCallback(window, keyCallback);
         glfwSetMouseButtonCallback(window, mouseButtonCallback);
         glfwSetCursorPosCallback(window, cursorPosCallback);
+        glfwSetScrollCallback(window, scrollCallback);
     }
 
     Window::Window(Window &&other) noexcept
@@ -103,6 +104,11 @@ namespace gfx
         y = mouseY;
     }
 
+    void Window::setInputManager(InputManager *input)
+    {
+        inputManager = input;
+    }
+
     void Window::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
     {
         Window *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
@@ -110,9 +116,9 @@ namespace gfx
             return;
 
         if (action == GLFW_PRESS)
-            win->keyStates[key] = true;
+            win->inputManager->setKeyState(key, true);
         else if (action == GLFW_RELEASE)
-            win->keyStates[key] = false;
+            win->inputManager->setKeyState(key, false);
     }
 
     void Window::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
@@ -122,21 +128,26 @@ namespace gfx
             return;
 
         if (action == GLFW_PRESS)
-            win->mouseButtonStates[button] = true;
+            win->inputManager->setMouseButtonState(button, true);
         else if (action == GLFW_RELEASE)
-            win->mouseButtonStates[button] = false;
+            win->inputManager->setMouseButtonState(button, false);
     }
 
     void Window::cursorPosCallback(GLFWwindow *window, double xpos, double ypos)
     {
         Window *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
         if (!win)
-        {
-            std::cerr << "cursorPosCallback: nullptr user pointer\n";
             return;
-        }
 
-        win->mouseX = xpos;
-        win->mouseY = ypos;
+        win->inputManager->setMousePosition(xpos, ypos);
+    }
+
+    void Window::scrollCallback(GLFWwindow *glfwWindow, double xoffset, double yoffset)
+    {
+        Window *win = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
+        if (!win || !win->inputManager)
+            return;
+
+        win->inputManager->setScrollOffset(xoffset, yoffset);
     }
 } // namespace gfx

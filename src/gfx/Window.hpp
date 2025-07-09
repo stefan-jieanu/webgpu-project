@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <glfw3webgpu.h>
 
+#include "../InputManager.hpp"
+
 namespace gfx
 {
     class Window
@@ -38,6 +40,8 @@ namespace gfx
         bool isMouseButtonPressed(int button) const;
         void getMousePosition(double &x, double &y) const;
 
+        void setInputManager(InputManager *input);
+
     private:
         int width, height;
         std::string title;
@@ -46,9 +50,12 @@ namespace gfx
         static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
         static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
         static void cursorPosCallback(GLFWwindow *window, double xpos, double ypos);
+        static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 
         std::unordered_map<int, bool> keyStates;
         std::unordered_map<int, bool> mouseButtonStates;
         double mouseX = 0.0, mouseY = 0.0;
+
+        InputManager *inputManager = nullptr; // not owned
     };
 } // namespace gfx
